@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Ray0427/url-shortener/handlers"
+	"github.com/Ray0427/url-shortener/controller"
+	"github.com/Ray0427/url-shortener/model"
+	"github.com/Ray0427/url-shortener/repo"
 	"github.com/caarlos0/env/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -21,6 +23,9 @@ type Config struct {
 		PORT     string `env:"DB_PORT" envDefault:"3306"`
 		DATABASE string `env:"DB_DATABASE"`
 	}
+	Server struct {
+		PORT string `env:"PORT"`
+	}
 }
 
 func initConfig() Config {
@@ -36,10 +41,12 @@ func initConfig() Config {
 	return config
 }
 
-func initRouter() *gin.Engine {
+func initRouter(db *gorm.DB) *gin.Engine {
+	urlRepo := repo.NewUrlRepo(db)
+	urlController := controller.NewUrlController(urlRepo)
 	r := gin.Default()
-	r.POST("/api/v1/urls", handlers.PostUrls)
-	r.GET("/:url_id", handlers.GetId)
+	r.POST("/api/v1/urls", urlController.PostUrl)
+	r.GET("/:url_id", urlController.GetId)
 	r.Run()
 	return r
 }
@@ -51,11 +58,17 @@ func initDatabase(config Config) *gorm.DB {
 	if err != nil {
 		log.Fatal("Error connect Database with gorm")
 	}
+	db.AutoMigrate(&model.Url{})
 	return db
 }
 
 func main() {
 	config := initConfig()
-	initDatabase(config)
-	initRouter()
+	db := initDatabase(config)
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Printf("%+v\n", err)
+	}
+	defer sqlDB.Close()
+	initRouter(db)
 }
