@@ -15,14 +15,14 @@ func NewUrlRepo(DB *gorm.DB) UrlRepo {
 	return UrlRepo{DB: DB}
 }
 
-func (ur *UrlRepo) CreateUrl(url string, expireAt time.Time) model.Url {
+func (ur *UrlRepo) CreateUrl(url string, expireAt time.Time) (model.Url, error) {
 	u := model.Url{FullUrl: url, ExpireAt: expireAt}
-	ur.DB.Create(&u)
-	return u
+	err := ur.DB.Create(&u).Error
+	return u, err
 }
 
-func (ur *UrlRepo) GetUrl(id uint) model.Url {
+func (ur *UrlRepo) GetUrl(id uint) (model.Url, error) {
 	var u model.Url
-	ur.DB.First(&u, id)
-	return u
+	err := ur.DB.First(&u, id).Error
+	return u, err
 }

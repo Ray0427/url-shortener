@@ -16,12 +16,15 @@ func Encode(salt string, minLength int, num int) string {
 	return e
 }
 
-func Decode(salt string, minLength int, hash string) int {
+func Decode(salt string, minLength int, hash string) (int, error) {
 	hd := hashids.NewData()
 	hd.Salt = salt
 	hd.MinLength = minLength
 	h, _ := hashids.NewWithData(hd)
-	numbers := h.Decode((hash))
+	numbers, err := h.DecodeWithError(hash)
+	if err != nil {
+		return 0, err
+	}
 	fmt.Println(numbers)
-	return numbers[0]
+	return numbers[0], nil
 }

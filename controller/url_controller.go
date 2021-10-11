@@ -40,7 +40,11 @@ func (uc *urlController) PostUrl(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	urlDTO := uc.urlRepo.CreateUrl(body.Url, body.ExpireAt)
+	urlDTO, err := uc.urlRepo.CreateUrl(body.Url, body.ExpireAt)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	hashID := utils.Encode(uc.config.HashID.Salt, uc.config.HashID.MinLength, int(urlDTO.ID))
 	s := fmt.Sprintf("http://localhost/%s", hashID)
 	c.JSON(http.StatusOK, gin.H{
@@ -51,7 +55,15 @@ func (uc *urlController) PostUrl(c *gin.Context) {
 
 func (uc *urlController) GetId(c *gin.Context) {
 	hashId := c.Param("url_id")
-	id := utils.Decode(uc.config.HashID.Salt, uc.config.HashID.MinLength, hashId)
-	urlDTO := uc.urlRepo.GetUrl(uint(id))
+	id, err := utils.Decode(uc.config.HashID.Salt, uc.config.HashID.MinLength, hashId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	urlDTO, err := uc.urlRepo.GetUrl(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
 	c.Redirect(http.StatusMovedPermanently, urlDTO.FullUrl)
 }
