@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Ray0427/url-shortener/config"
 	"github.com/Ray0427/url-shortener/repo"
+	"github.com/Ray0427/url-shortener/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +18,14 @@ type UrlController interface {
 
 type urlController struct {
 	urlRepo repo.UrlRepo
+	config  config.Config
 }
 
 //Constructor Function
-func NewUrlController(repo repo.UrlRepo) UrlController {
+func NewUrlController(repo repo.UrlRepo, config config.Config) UrlController {
 	return &urlController{
 		urlRepo: repo,
+		config:  config,
 	}
 }
 
@@ -37,13 +41,17 @@ func (uc *urlController) PostUrl(c *gin.Context) {
 		return
 	}
 	urlDTO := uc.urlRepo.CreateUrl(body.Url, body.ExpireAt)
-	s := fmt.Sprintf("http://localhost/%d", urlDTO.ID)
+	hashID := utils.Encode(uc.config.HashID.Salt, uc.config.HashID.MinLength, int(urlDTO.ID))
+	s := fmt.Sprintf("http://localhost/%s", hashID)
 	c.JSON(http.StatusOK, gin.H{
-		"id":       urlDTO.ID,
+		"id":       hashID,
 		"shortUrl": s,
 	})
 }
 
 func (uc *urlController) GetId(c *gin.Context) {
-	c.Redirect(http.StatusMovedPermanently, "http://localhost/<url_id>")
+	hashId := c.Param("url_id")
+	id := utils.Decode(uc.config.HashID.Salt, uc.config.HashID.MinLength, hashId)
+	urlDTO := uc.urlRepo.GetUrl(uint(id))
+	c.Redirect(http.StatusMovedPermanently, urlDTO.FullUrl)
 }

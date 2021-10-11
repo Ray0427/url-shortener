@@ -23,6 +23,6 @@ func (ur *UrlRepo) CreateUrl(url string, expireAt time.Time) model.Url {
 
 func (ur *UrlRepo) GetUrl(id uint) model.Url {
 	var u model.Url
-	ur.DB.First(&ur, id)
+	ur.DB.First(&u, id)
 	return u
 }
