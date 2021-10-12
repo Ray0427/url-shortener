@@ -8,6 +8,6 @@ import (
 
 type Url struct {
 	gorm.Model
-	FullUrl  string
-	ExpireAt time.Time
+	FullUrl  string    `json:"fullUrl"`
+	ExpireAt time.Time `json:"expireAt"`
 }

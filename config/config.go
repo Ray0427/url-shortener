@@ -23,6 +23,11 @@ type Config struct {
 		Salt      string `env:"HASHID_SALT"`
 		MinLength int    `env:"HASHID_MIN_LENGTH"`
 	}
+	Redis struct {
+		Address  string `env:"REDIS_ADDRESS"`
+		Port     string `env:"REDIS_PORT" envDefault:"6379"`
+		Password string `env:"REDIS_PASSWORD"`
+	}
 }
 
 func InitConfig() Config {

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/Ray0427/url-shortener/cache"
 	"github.com/Ray0427/url-shortener/config"
 	"github.com/Ray0427/url-shortener/controller"
 	"github.com/Ray0427/url-shortener/database"
@@ -11,9 +12,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func initRouter(config config.Config, db *gorm.DB) *gin.Engine {
+func initRouter(config config.Config, db *gorm.DB, cache *cache.Cache) *gin.Engine {
 	urlRepo := repo.NewUrlRepo(db)
-	urlController := controller.NewUrlController(urlRepo, config)
+	urlController := controller.NewUrlController(config, urlRepo, cache)
 	r := gin.Default()
 	r.POST("/api/v1/urls", urlController.PostUrl)
 	r.GET("/:url_id", urlController.GetId)
@@ -29,5 +30,6 @@ func main() {
 		log.Printf("%+v\n", err)
 	}
 	defer sqlDB.Close()
-	initRouter(config, db)
+	cache := cache.InitCache(config)
+	initRouter(config, db, cache)
 }
