@@ -27,6 +27,12 @@ Fulfill your config for Mysql, Redis and hashids
 go mod download
 ```
 
+### Unit test
+
+```shell
+go test -v -cover=true ./...  
+```
+
 ### Run server
 
 ```shell
