@@ -65,4 +65,11 @@ curl -X POST -H "Content-Type:application/json" http://localhost/api/v1/urls -d 
 curl -L -X GET http://localhost/<url_id>
 ```
 
+#### response
+
  REDIRECT to original URL
+
+## TO DO
+
+- [ ] unit test
+- [ ] validator
