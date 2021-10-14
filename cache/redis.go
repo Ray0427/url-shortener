@@ -14,6 +14,17 @@ type Cache struct {
 	ctx    context.Context
 }
 
+type Url struct {
+	Url      string    `json:"url"`
+	ExpireAt time.Time `json:"expireAt"`
+}
+
+type EmptyError struct{}
+
+func (e EmptyError) Error() string {
+	return "empty"
+}
+
 func InitCache(config config.Config) *Cache {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.Redis.Address + ":" + config.Redis.Port,
@@ -43,6 +54,9 @@ func (c *Cache) GetUrl(hashId string, url interface{}) error {
 	cacheVal, err := c.client.Get(c.ctx, "HASH_ID:"+hashId).Result()
 	if err != nil {
 		return err
+	}
+	if cacheVal == "null" {
+		return EmptyError{}
 	}
 	err = json.Unmarshal([]byte(cacheVal), &url)
 	if err != nil {

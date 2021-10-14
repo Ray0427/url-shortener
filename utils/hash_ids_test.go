@@ -9,9 +9,10 @@ func TestEncode(t *testing.T) {
 		num       int
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
 		// TODO: Add test cases.
 		{
@@ -21,12 +22,29 @@ func TestEncode(t *testing.T) {
 				minLength: 10,
 				num:       1,
 			},
-			want: "3wedgpzLRq",
+			want:    "3wedgpzLRq",
+			wantErr: false,
+		},
+
+		{
+			name: "TestEncodeFailed",
+			args: args{
+				salt:      "test",
+				minLength: 10,
+				num:       -1,
+			},
+			want:    "",
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Encode(tt.args.salt, tt.args.minLength, tt.args.num); got != tt.want {
+			got, err := Encode(tt.args.salt, tt.args.minLength, tt.args.num)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Encode() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
 				t.Errorf("Encode() = %v, want %v", got, tt.want)
 			}
 		})
@@ -63,7 +81,6 @@ func TestDecode(t *testing.T) {
 				minLength: 10,
 				hash:      "3wedgpzLR",
 			},
-			want:    0,
 			wantErr: true,
 		},
 	}

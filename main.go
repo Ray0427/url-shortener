@@ -13,7 +13,7 @@ import (
 )
 
 func initRouter(config config.Config, db *gorm.DB, cache *cache.Cache) *gin.Engine {
-	urlRepo := repo.NewUrlRepo(db)
+	urlRepo := repo.NewUrlRepo(db, cache, config)
 	urlController := controller.NewUrlController(config, urlRepo, cache)
 	r := gin.Default()
 	r.POST("/api/v1/urls", urlController.PostUrl)

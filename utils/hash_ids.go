@@ -6,14 +6,17 @@ import (
 	"github.com/speps/go-hashids/v2"
 )
 
-func Encode(salt string, minLength int, num int) string {
+func Encode(salt string, minLength int, num int) (string, error) {
 	hd := hashids.NewData()
 	hd.Salt = salt
 	hd.MinLength = minLength
 	h, _ := hashids.NewWithData(hd)
-	e, _ := h.Encode([]int{num})
+	e, err := h.Encode([]int{num})
+	if err != nil {
+		return "", err
+	}
 	fmt.Println(e)
-	return e
+	return e, nil
 }
 
 func Decode(salt string, minLength int, hash string) (int, error) {

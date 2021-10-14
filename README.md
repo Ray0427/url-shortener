@@ -73,3 +73,4 @@ curl -L -X GET http://localhost/<url_id>
 
 - [ ] unit test
 - [ ] validator
+- [ ] flow diagram
