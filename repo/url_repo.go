@@ -51,6 +51,14 @@ func (e InternalServerError) Error() string {
 	return e.Message
 }
 
+type GoneError struct {
+	Message string
+}
+
+func (e GoneError) Error() string {
+	return e.Message
+}
+
 func (ur *UrlRepo) CreateUrl(url string, expireAt time.Time) (string, error) {
 	urlDTO, err := ur.Dao.Create(url, expireAt)
 	if err != nil {
@@ -88,6 +96,13 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 		return "", NotFoundError{}
 	} else if err != nil {
 		log.Printf("%+v\n", err)
+	} else if err == nil {
+		if url.ExpireAt.Before(time.Now()) {
+			return "", GoneError{
+				Message: "Link Expired",
+			}
+		}
+		return url.Url, nil
 	}
 	id, err := utils.Decode(ur.config.HashID.Salt, ur.config.HashID.MinLength, hashID)
 	if err != nil {
@@ -103,6 +118,11 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 		}
 		return "", InternalServerError{
 			Message: "DB Error",
+		}
+	}
+	if urlDTO.ExpireAt.Before(time.Now()) {
+		return "", GoneError{
+			Message: "Link Expired",
 		}
 	}
 	err = ur.cache.SetUrl(hashID, cache.Url{

@@ -8,6 +8,7 @@ import (
 	"github.com/Ray0427/url-shortener/cache"
 	"github.com/Ray0427/url-shortener/config"
 	"github.com/Ray0427/url-shortener/repo"
+	"github.com/Ray0427/url-shortener/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,6 +43,10 @@ func (uc *urlController) PostUrl(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if !utils.CheckUrl(body.Url) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid url"})
+		return
+	}
 	hashID, err := uc.urlRepo.CreateUrl(body.Url, body.ExpireAt)
 	if err != nil {
 		switch err.(type) {
@@ -69,6 +74,8 @@ func (uc *urlController) GetId(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		case *repo.NotFoundError:
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		case *repo.GoneError:
+			c.JSON(http.StatusGone, gin.H{"error": err.Error()})
 		case *repo.InternalServerError:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		default:
