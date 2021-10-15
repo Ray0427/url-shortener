@@ -64,10 +64,10 @@ Fulfill your config for Mysql, Redis and hashids
 
 ## Usage
 
-### Download go module
+### Build
 
 ```shell
-go mod download
+go build 
 ```
 
 ### Unit test
