@@ -2,6 +2,8 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 
@@ -21,7 +23,7 @@ func TestCache_SetUrl(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		prepare func(mock redismock.ClientMock)
+		prepare func(mock redismock.ClientMock, args args)
 		fields  fields
 		args    args
 		wantErr bool
@@ -29,11 +31,9 @@ func TestCache_SetUrl(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "SetSuccess",
-			prepare: func(mock redismock.ClientMock, args ) {
-				mock.ExpectSet("HASH_ID:"+"abc", Url{
-					Url:      "https://ipinfo.io",
-					ExpireAt: time.Now().AddDate(0, 0, 1),
-				}, time.Hour).SetErr(nil)
+			prepare: func(mock redismock.ClientMock, args args) {
+				val, _ := json.Marshal(args.url)
+				mock.ExpectSet("HASH_ID:"+args.hashId, val, time.Hour).SetVal("ok")
 			},
 			args: args{
 				hashId: "abc",
@@ -44,17 +44,37 @@ func TestCache_SetUrl(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "SetEmptySuccess",
+			prepare: func(mock redismock.ClientMock, args args) {
+				val, _ := json.Marshal(args.url)
+				mock.ExpectSet("HASH_ID:"+args.hashId, val, time.Hour).SetVal("ok")
+			},
+			args: args{
+				hashId: "abc",
+				url:    nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "SetFailed",
+			prepare: func(mock redismock.ClientMock, args args) {
+				val, _ := json.Marshal(args.url)
+				mock.ExpectSet("HASH_ID:"+args.hashId, val, time.Hour).SetErr(errors.New("set failed"))
+			},
+			args: args{
+				hashId: "abc",
+				url:    nil,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var ctx = context.TODO()
 			db, mock := redismock.NewClientMock()
-			// f := fields{
-			// 	client: db,
-			// 	ctx:    ctx,
-			// }
 			if tt.prepare != nil {
-				tt.prepare(mock)
+				tt.prepare(mock, tt.args)
 			}
 			c := &Cache{
 				client: db,

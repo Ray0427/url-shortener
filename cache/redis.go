@@ -48,7 +48,7 @@ func (c *Cache) SetUrl(hashId string, url interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = c.client.Set(c.ctx, "HASH_ID:"+hashId, val, time.Hour).Err()
+	_, err = c.client.Set(c.ctx, "HASH_ID:"+hashId, val, time.Hour).Result()
 	if err != nil {
 		return err
 	}
