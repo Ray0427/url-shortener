@@ -61,6 +61,7 @@ cp .env.example .env
 ```
 
 Fulfill your config for Mysql, Redis and hashids
+HASHID_SALT為字串, HASHID_MIN_LENGTH為url_id長度
 
 ## Usage
 
@@ -113,7 +114,7 @@ curl -L -X GET http://localhost/<url_id>
 REDIRECT to original URL
 
 ## TO DO
-
 - [ ] cache unit test
 - [ ] dao unit test
 - [ ] controller unit test
+尚未完成的測試項目，會陸續補上
