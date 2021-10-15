@@ -26,7 +26,7 @@ type Url struct {
 
 type EmptyError struct{}
 
-func (e EmptyError) Error() string {
+func (e *EmptyError) Error() string {
 	return "empty"
 }
 
@@ -61,7 +61,7 @@ func (c *Cache) GetUrl(hashId string, url interface{}) error {
 		return err
 	}
 	if cacheVal == "null" {
-		return EmptyError{}
+		return &EmptyError{}
 	}
 	err = json.Unmarshal([]byte(cacheVal), &url)
 	if err != nil {

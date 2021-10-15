@@ -14,14 +14,14 @@ import (
 )
 
 type UrlRepo struct {
-	Dao    *dao.UrlDao
-	cache  *cache.Cache
+	Dao    dao.UrlDaoInterface
+	cache  cache.CacheInterface
 	config config.Config
 }
 
-func NewUrlRepo(DB *gorm.DB, cache *cache.Cache, config config.Config) *UrlRepo {
+func NewUrlRepo(dao dao.UrlDaoInterface, cache cache.CacheInterface, config config.Config) *UrlRepo {
 	return &UrlRepo{
-		Dao:    dao.NewUrlDao(DB),
+		Dao:    dao,
 		cache:  cache,
 		config: config,
 	}
@@ -31,7 +31,7 @@ type NotFoundError struct {
 	Message string
 }
 
-func (e NotFoundError) Error() string {
+func (e *NotFoundError) Error() string {
 	return "Not Found"
 }
 
@@ -39,7 +39,7 @@ type BadRequestError struct {
 	Message string
 }
 
-func (e BadRequestError) Error() string {
+func (e *BadRequestError) Error() string {
 	return e.Message
 }
 
@@ -47,7 +47,7 @@ type InternalServerError struct {
 	Message string
 }
 
-func (e InternalServerError) Error() string {
+func (e *InternalServerError) Error() string {
 	return e.Message
 }
 
@@ -55,14 +55,14 @@ func (ur *UrlRepo) CreateUrl(url string, expireAt time.Time) (string, error) {
 	urlDTO, err := ur.Dao.Create(url, expireAt)
 	if err != nil {
 		log.Printf("%+v\n", err)
-		return "", InternalServerError{
+		return "", &InternalServerError{
 			Message: "DB Error",
 		}
 	}
 	hashID, err := utils.Encode(ur.config.HashID.Salt, ur.config.HashID.MinLength, int(urlDTO.ID))
 	if err != nil {
 		log.Printf("%+v\n", err)
-		return "", BadRequestError{
+		return "", &BadRequestError{
 			Message: "Invalid HashId",
 		}
 	}
@@ -72,7 +72,7 @@ func (ur *UrlRepo) CreateUrl(url string, expireAt time.Time) (string, error) {
 	})
 	if err != nil {
 		log.Printf("%+v\n", err)
-		return "", InternalServerError{
+		return "", &InternalServerError{
 			Message: "Cache Error",
 		}
 	}
@@ -84,13 +84,13 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 	err := ur.cache.GetUrl(hashID, &url)
 	if err == redis.Nil {
 		log.Println("cache not hit")
-	} else if _, isEmptyError := err.(cache.EmptyError); isEmptyError {
-		return "", NotFoundError{}
+	} else if _, isEmptyError := err.(*cache.EmptyError); isEmptyError {
+		return "", &NotFoundError{}
 	} else if err != nil {
 		log.Printf("%+v\n", err)
 	} else if err == nil {
 		if url.ExpireAt.Before(time.Now()) {
-			return "", NotFoundError{
+			return "", &NotFoundError{
 				Message: "Link Expired",
 			}
 		}
@@ -98,7 +98,7 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 	}
 	id, err := utils.Decode(ur.config.HashID.Salt, ur.config.HashID.MinLength, hashID)
 	if err != nil {
-		return "", BadRequestError{
+		return "", &BadRequestError{
 			Message: "Invalid HashId",
 		}
 	}
@@ -106,9 +106,9 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ur.cache.SetUrl(hashID, nil)
-			return "", NotFoundError{}
+			return "", &NotFoundError{}
 		}
-		return "", InternalServerError{
+		return "", &InternalServerError{
 			Message: "DB Error",
 		}
 	}
@@ -120,9 +120,7 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 		log.Printf("%+v\n", err)
 	}
 	if urlDTO.ExpireAt.Before(time.Now()) {
-		return "", NotFoundError{
-			Message: "Link Expired",
-		}
+		return "", &NotFoundError{}
 	}
 	return urlDTO.FullUrl, err
 }

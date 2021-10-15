@@ -6,6 +6,7 @@ import (
 	"github.com/Ray0427/url-shortener/cache"
 	"github.com/Ray0427/url-shortener/config"
 	"github.com/Ray0427/url-shortener/controller"
+	"github.com/Ray0427/url-shortener/dao"
 	"github.com/Ray0427/url-shortener/database"
 	"github.com/Ray0427/url-shortener/repo"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,8 @@ import (
 )
 
 func initRouter(config config.Config, db *gorm.DB, cache *cache.Cache) *gin.Engine {
-	urlRepo := repo.NewUrlRepo(db, cache, config)
+	dao := dao.NewUrlDao(db)
+	urlRepo := repo.NewUrlRepo(dao, cache, config)
 	urlController := controller.NewUrlController(config, urlRepo, cache)
 	r := gin.Default()
 	r.POST("/api/v1/urls", urlController.PostUrl)
