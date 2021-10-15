@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/caarlos0/env/v6 v6.7.1
+	github.com/cweill/gotests v1.6.0 // indirect
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.4
@@ -16,9 +17,11 @@ require (
 	github.com/speps/go-hashids/v2 v2.0.1
 	github.com/ugorji/go v1.2.6 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
 	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/gorm v1.21.16
