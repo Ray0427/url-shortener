@@ -114,4 +114,6 @@ REDIRECT to original URL
 
 ## TO DO
 
-- [ ] unit test
+- [ ] cache unit test
+- [ ] dao unit test
+- [ ] controller unit test
