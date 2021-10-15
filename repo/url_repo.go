@@ -14,13 +14,13 @@ import (
 )
 
 type UrlRepo struct {
-	Dao    dao.UrlDao
+	Dao    *dao.UrlDao
 	cache  *cache.Cache
 	config config.Config
 }
 
-func NewUrlRepo(DB *gorm.DB, cache *cache.Cache, config config.Config) UrlRepo {
-	return UrlRepo{
+func NewUrlRepo(DB *gorm.DB, cache *cache.Cache, config config.Config) *UrlRepo {
+	return &UrlRepo{
 		Dao:    dao.NewUrlDao(DB),
 		cache:  cache,
 		config: config,
@@ -48,14 +48,6 @@ type InternalServerError struct {
 }
 
 func (e InternalServerError) Error() string {
-	return e.Message
-}
-
-type GoneError struct {
-	Message string
-}
-
-func (e GoneError) Error() string {
 	return e.Message
 }
 
@@ -98,7 +90,7 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 		log.Printf("%+v\n", err)
 	} else if err == nil {
 		if url.ExpireAt.Before(time.Now()) {
-			return "", GoneError{
+			return "", NotFoundError{
 				Message: "Link Expired",
 			}
 		}
@@ -120,17 +112,17 @@ func (ur *UrlRepo) GetUrl(hashID string) (string, error) {
 			Message: "DB Error",
 		}
 	}
-	if urlDTO.ExpireAt.Before(time.Now()) {
-		return "", GoneError{
-			Message: "Link Expired",
-		}
-	}
 	err = ur.cache.SetUrl(hashID, cache.Url{
 		Url:      urlDTO.FullUrl,
 		ExpireAt: urlDTO.ExpireAt,
 	})
 	if err != nil {
 		log.Printf("%+v\n", err)
+	}
+	if urlDTO.ExpireAt.Before(time.Now()) {
+		return "", NotFoundError{
+			Message: "Link Expired",
+		}
 	}
 	return urlDTO.FullUrl, err
 }

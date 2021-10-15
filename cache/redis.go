@@ -9,6 +9,11 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+type CacheInterface interface {
+	SetUrl(hashId string, url interface{}) error
+	GetUrl(hashId string, url interface{}) error
+}
+
 type Cache struct {
 	client *redis.Client
 	ctx    context.Context

@@ -19,12 +19,12 @@ type UrlController interface {
 
 type urlController struct {
 	config  config.Config
-	urlRepo repo.UrlRepo
+	urlRepo *repo.UrlRepo
 	cache   *cache.Cache
 }
 
 //Constructor Function
-func NewUrlController(config config.Config, repo repo.UrlRepo, cache *cache.Cache) UrlController {
+func NewUrlController(config config.Config, repo *repo.UrlRepo, cache *cache.Cache) UrlController {
 	return &urlController{
 		config:  config,
 		urlRepo: repo,
@@ -74,8 +74,6 @@ func (uc *urlController) GetId(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		case *repo.NotFoundError:
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		case *repo.GoneError:
-			c.JSON(http.StatusGone, gin.H{"error": err.Error()})
 		case *repo.InternalServerError:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		default:

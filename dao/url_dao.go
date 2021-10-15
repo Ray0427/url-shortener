@@ -7,12 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
+type UrlDaoInterface interface {
+	Create(url string, expireAt time.Time) (model.Url, error)
+	Get(id uint) (model.Url, error)
+}
+
 type UrlDao struct {
 	DB *gorm.DB
 }
 
-func NewUrlDao(DB *gorm.DB) UrlDao {
-	return UrlDao{
+func NewUrlDao(DB *gorm.DB) *UrlDao {
+	return &UrlDao{
 		DB: DB,
 	}
 }
