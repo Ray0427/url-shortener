@@ -101,12 +101,42 @@ func TestCache_GetUrl(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "GetSuccess",
+			prepare: func(mock redismock.ClientMock, args args) {
+				val, _ := json.Marshal(args.url)
+				mock.ExpectGet("HASH_ID:" + args.hashId).SetVal(string(val))
+			},
 			args: args{
 				hashId: "abc",
 				url: Url{
 					Url:      "https://ipinfo.io",
 					ExpireAt: time.Now().AddDate(0, 0, 1),
 				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "GetError",
+			prepare: func(mock redismock.ClientMock, args args) {
+				mock.ExpectGet("HASH_ID:" + args.hashId).SetErr(errors.New("redis error"))
+			},
+			args: args{
+				hashId: "abc",
+				url: Url{
+					Url:      "https://ipinfo.io",
+					ExpireAt: time.Now().AddDate(0, 0, 1),
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "GetEmpty",
+			prepare: func(mock redismock.ClientMock, args args) {
+				val, _ := json.Marshal(args.url)
+				mock.ExpectGet("HASH_ID:" + args.hashId).SetVal(string(val))
+			},
+			args: args{
+				hashId: "abc",
+				url:    nil,
 			},
 			wantErr: true,
 		},

@@ -114,7 +114,7 @@ curl -L -X GET http://localhost/<url_id>
 REDIRECT to original URL
 
 ## TO DO
-- [ ] cache unit test
+- [x] cache unit test
 - [ ] dao unit test
 - [ ] controller unit test
 尚未完成的測試項目，會陸續補上
