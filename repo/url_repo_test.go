@@ -25,10 +25,10 @@ func TestUrlRepo_CreateUrl(t *testing.T) {
 		url      string
 		expireAt time.Time
 	}
-	layout := "2006-01-02T15:04:05.000Z"
-	url1 := "https://ipinfo.io"
-	expireAt1, _ := time.Parse(layout, "2021-02-08T09:20:41Z")
-	hashId1 := "94vz1DdAwM"
+	layout := "2006-01-02T15:04:05Z"
+	sampleUrl := "https://ipinfo.io"
+	sampleExpireAt, _ := time.Parse(layout, "2021-02-08T09:20:41Z")
+	sampleHashId := "94vz1DdAwM"
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockUrlDao := mock_dao.NewMockUrlDaoInterface(ctrl)
@@ -47,48 +47,48 @@ func TestUrlRepo_CreateUrl(t *testing.T) {
 		{
 			name: "CreateSuccess",
 			prepare: func(f *fields) {
-				f.Dao.EXPECT().Create(url1, expireAt1).Return(model.Url{
-					FullUrl:  url1,
-					ExpireAt: expireAt1,
+				f.Dao.EXPECT().Create(sampleUrl, sampleExpireAt).Return(model.Url{
+					FullUrl:  sampleUrl,
+					ExpireAt: sampleExpireAt,
 				}, nil)
-				f.cache.EXPECT().SetUrl(hashId1, cache.Url{
-					Url:      url1,
-					ExpireAt: expireAt1,
+				f.cache.EXPECT().SetUrl(sampleHashId, cache.Url{
+					Url:      sampleUrl,
+					ExpireAt: sampleExpireAt,
 				}).Return(nil)
 			},
 			args: args{
-				url:      url1,
-				expireAt: expireAt1,
+				url:      sampleUrl,
+				expireAt: sampleExpireAt,
 			},
-			want:    hashId1,
+			want:    sampleHashId,
 			wantErr: false,
 		},
 		{
 			name: "DatabaseError",
 			prepare: func(f *fields) {
-				f.Dao.EXPECT().Create(url1, expireAt1).Return(model.Url{}, errors.New(""))
+				f.Dao.EXPECT().Create(sampleUrl, sampleExpireAt).Return(model.Url{}, errors.New(""))
 			},
 			args: args{
-				url:      url1,
-				expireAt: expireAt1,
+				url:      sampleUrl,
+				expireAt: sampleExpireAt,
 			},
 			wantErr: true,
 		},
 		{
 			name: "CacheSuccess",
 			prepare: func(f *fields) {
-				f.Dao.EXPECT().Create(url1, expireAt1).Return(model.Url{
-					FullUrl:  url1,
-					ExpireAt: expireAt1,
+				f.Dao.EXPECT().Create(sampleUrl, sampleExpireAt).Return(model.Url{
+					FullUrl:  sampleUrl,
+					ExpireAt: sampleExpireAt,
 				}, nil)
-				f.cache.EXPECT().SetUrl(hashId1, cache.Url{
-					Url:      url1,
-					ExpireAt: expireAt1,
+				f.cache.EXPECT().SetUrl(sampleHashId, cache.Url{
+					Url:      sampleUrl,
+					ExpireAt: sampleExpireAt,
 				}).Return(errors.New(""))
 			},
 			args: args{
-				url:      url1,
-				expireAt: expireAt1,
+				url:      sampleUrl,
+				expireAt: sampleExpireAt,
 			},
 			wantErr: true,
 		},
@@ -129,9 +129,8 @@ func TestUrlRepo_GetUrl(t *testing.T) {
 	type args struct {
 		hashID string
 	}
-	// layout := "2006-01-02T15:04:05.000Z"
+
 	url1 := "https://ipinfo.io"
-	// expireAt1, _ := time.Parse(layout, "2021-02-08T09:20:41Z")
 	hashId1 := "3wedgpzLRq"
 	id1 := 1
 	ctrl := gomock.NewController(t)

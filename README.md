@@ -116,5 +116,5 @@ REDIRECT to original URL
 ## TO DO
 - [x] cache unit test
 - [ ] dao unit test
-- [ ] controller unit test
+- [x] controller unit test
 尚未完成的測試項目，會陸續補上
