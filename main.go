@@ -16,7 +16,7 @@ import (
 func initRouter(config config.Config, db *gorm.DB, cache *cache.Cache) *gin.Engine {
 	dao := dao.NewUrlDao(db)
 	urlRepo := repo.NewUrlRepo(dao, cache, config)
-	urlController := controller.NewUrlController(config, urlRepo, cache)
+	urlController := controller.NewUrlController(urlRepo)
 	r := gin.Default()
 	r.POST("/api/v1/urls", urlController.PostUrl)
 	r.GET("/:url_id", urlController.GetId)

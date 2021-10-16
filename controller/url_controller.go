@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Ray0427/url-shortener/cache"
-	"github.com/Ray0427/url-shortener/config"
 	"github.com/Ray0427/url-shortener/repo"
 	"github.com/Ray0427/url-shortener/utils"
 	"github.com/gin-gonic/gin"
@@ -18,17 +16,13 @@ type UrlController interface {
 }
 
 type urlController struct {
-	config  config.Config
-	urlRepo *repo.UrlRepo
-	cache   *cache.Cache
+	urlRepo repo.UrlRepoInterface
 }
 
 //Constructor Function
-func NewUrlController(config config.Config, repo *repo.UrlRepo, cache *cache.Cache) UrlController {
+func NewUrlController(repo repo.UrlRepoInterface) UrlController {
 	return &urlController{
-		config:  config,
 		urlRepo: repo,
-		cache:   cache,
 	}
 }
 

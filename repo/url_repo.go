@@ -13,6 +13,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type UrlRepoInterface interface {
+	CreateUrl(url string, expireAt time.Time) (string, error)
+	GetUrl(hashID string) (string, error)
+}
+
 type UrlRepo struct {
 	Dao    dao.UrlDaoInterface
 	cache  cache.CacheInterface
