@@ -2,12 +2,10 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Url struct {
-	gorm.Model
+	ID       uint      `gorm:"primarykey"`
 	FullUrl  string    `json:"fullUrl"`
 	ExpireAt time.Time `json:"expireAt"`
 }
